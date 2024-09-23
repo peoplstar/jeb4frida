@@ -109,19 +109,26 @@ class Jeb4frida(IScript):
             method_arguments = [m.getIdentifier().toString() for m in method_parameters]
             method_overload_parameters = []
 
+            print_method_arguments = method_arguments # Easily see actual parameter values
+            method_arguments_text  = u"{" 
+            method_arguments_text += u"""{print_method_arguments}""".format(print_method_arguments='}, {'.join(print_method_arguments))
+            method_arguments_text += u"}"
+
             for p in method_parameters:
                 method_overload_parameters.append(u'"{}"'.format(self.to_canonical_name(p.getType().getSignature())))
                
             frida_hook += u"""
     var {method_name_var} = {class_name_var}.{method_name}.overload({method_overload});
     {method_name_var}.implementation = function({method_arguments}) {{
-        console.log(`[+] Hooked {class_name}.{method_name}({method_arguments})`);
-        return {method_name_var}.call(this{hack}{method_arguments});
+        console.log(`[+] Hooked {class_name}.{method_name}({method_arguments_text})`);
+        var ret = {method_name_var}.call(this{hack}{method_arguments});
+        return ret;
     }};""".format(
                 class_name_var=class_name_var,
                 class_name=class_name,
                 method_name_var=method_name_var,
                 method_name=method_name,
+                method_arguments_text=method_arguments_text,
                 method_overload=', '.join(method_overload_parameters),
                 method_arguments=', '.join(method_arguments),
                 hack=', ' if len(method_arguments) > 0 else '')
