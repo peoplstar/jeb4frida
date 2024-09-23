@@ -110,8 +110,8 @@ class Jeb4frida(IScript):
             method_overload_parameters = []
 
             print_method_arguments = method_arguments # Easily see actual parameter values
-            method_arguments_text  = u"{" 
-            method_arguments_text += u"""{print_method_arguments}""".format(print_method_arguments='}, {'.join(print_method_arguments))
+            method_arguments_text  = u"${"
+            method_arguments_text += u"""{print_method_arguments}""".format(print_method_arguments='}, ${'.join(print_method_arguments))
             method_arguments_text += u"}"
 
             for p in method_parameters:
