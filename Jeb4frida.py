@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #?description=Helper JEB script to generate Frida hooks
-#?shortcut=
+#?shortcut=Mod1+Shift+C
 
 from com.pnfsoftware.jeb.client.api import IScript, IGraphicalClientContext
 from com.pnfsoftware.jeb.core import Artifact
@@ -14,6 +14,8 @@ from com.pnfsoftware.jeb.core.units import UnitUtil
 from java.awt.datatransfer import StringSelection
 from java.awt.datatransfer import Clipboard
 from java.awt import Toolkit
+import subprocess
+from subprocess import Popen, PIPE
 
 from java.io import File
 import re
@@ -109,7 +111,7 @@ class Jeb4frida(IScript):
             method_arguments = [m.getIdentifier().toString() for m in method_parameters]
             method_overload_parameters = []
 
-            print_method_arguments = method_arguments # Easily see actual parameter values
+            print_method_arguments = method_arguments
             method_arguments_text  = u"${"
             method_arguments_text += u"""{print_method_arguments}""".format(print_method_arguments='}, ${'.join(print_method_arguments))
             method_arguments_text += u"}"
@@ -120,7 +122,7 @@ class Jeb4frida(IScript):
             frida_hook += u"""
     var {method_name_var} = {class_name_var}.{method_name}.overload({method_overload});
     {method_name_var}.implementation = function({method_arguments}) {{
-        console.log(`[+] Hooked {class_name}.{method_name}({method_arguments_text})`);
+        console.log(`[+] Hooked {class_name}.{method_name}({method_arguments_text})\\n`);
         var ret = {method_name_var}.call(this{hack}{method_arguments});
         return ret;
     }};""".format(
@@ -132,7 +134,7 @@ class Jeb4frida(IScript):
                 method_overload=', '.join(method_overload_parameters),
                 method_arguments=', '.join(method_arguments),
                 hack=', ' if len(method_arguments) > 0 else '')
-
+        subprocess.Popen(['clip'], stdin=subprocess.PIPE).communicate(input=(frida_hook.encode()))
         return u"Java.perform(function() {{\n{}\n}});".format(frida_hook)
     
 
