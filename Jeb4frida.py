@@ -124,6 +124,7 @@ class Jeb4frida(IScript):
     {method_name_var}.implementation = function({method_arguments}) {{
         console.log(`[+] Hooked {class_name}.{method_name}({method_arguments_text})\\n`);
         var ret = {method_name_var}.call(this{hack}{method_arguments});
+        console.log(`[*] {method_name}({method_arguments_text}) Return Value : ${{ret}}\\n`);
         return ret;
     }};""".format(
                 class_name_var=class_name_var,
